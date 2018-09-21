@@ -21,7 +21,7 @@ void wait_for_button(uint8_t button);
 
 void initiate_game();
 void select_range();
-void show_next_number();
+void show_next_number(unsigned int number, uint8_t index);
 void end_game();
 
 void setup()
@@ -59,7 +59,7 @@ void select_range()
     wait_for_button(select_button);
     first_row_mesage("Cantidad:");
     second_row_message(selected_number);
-    while(!digitalRead(next_button))
+    while (!digitalRead(next_button))
     {
         if (digitalRead(up_button))
         {
@@ -78,45 +78,69 @@ void select_range()
     Serial.println("Numero seleccionado:");
     Serial.println(selected_number);
 
-    if (selected_number <= 0) return;
+    if (selected_number <= 0)
+        return;
 
     unsigned int numeros[selected_number];
-
-    // fill the array with values
-    for(int i = 0; i < selected_number; i++)
-    {
-        numeros[i] = i + 1;
-    }
-
     randomSeed(millis());
+    bool found = true;
+    // fill the array with values
+    for (unsigned int i = 0; i < selected_number; i++)
+    {
+        while (found)
+        {
+            numeros[i] = random(1, selected_number + 1);
+            for (unsigned int j = 0; j < i; j++)
+            {
+                if (numeros[j] == numeros[i])
+                {
+                    found = true;
+                    break;
+                }
+                else if (j == i - 1)
+                {
+                    found = false;
+                }
+            }
+            if (i == 0)
+            {
+                found = false;
+            }
+        }
+        found = true;
+    }
 
     // shuffle the array
     // explained on: https://stackoverflow.com/questions/32413209/shuffle-an-array-in-arduino-software
-    const size_t array_size = sizeof(numeros) / sizeof(numeros[0]);
-    for (size_t i = 0; i < array_size - 1; i++)
-    {
-        size_t j = random(0, array_size - i);
+    // const size_t array_size = sizeof(numeros) / sizeof(numeros[0]);
+    // for (size_t i = 0; i < array_size - 1; i++)
+    // {
+    //     size_t j = random(0, array_size - i);
 
-        // swap the values between i and j index
-        int t = numeros[i];
-        numeros[i] = numeros[j];
-        numeros[j] = t;
-    }
+    //     // swap the values between i and j index
+    //     int t = numeros[i];
+    //     numeros[i] = numeros[j];
+    //     numeros[j] = t;
+    // }
 
     // print the shuffle numbers
     Serial.println("Numeros generados");
-    for (int i = 0; i < selected_number; i++)
+    for (unsigned int i = 0; i < selected_number; i++)
     {
         Serial.println(numeros[i]);
     }
 
-    delay(100000);
+    for (unsigned int i = 0; i < selected_number; i++)
+    {
+        show_next_number(numeros[i], i + 1);
+        wait_for_button(next_button);
+    }
 }
 
 void first_row_mesage(const char *message)
 {
     clear_row(0);
-    lcd.setCursor(0, 0);    
+    lcd.setCursor(0, 0);
     lcd.print(message);
 }
 
@@ -151,13 +175,21 @@ void complete_message(const char *message)
 void clear_row(uint8_t row)
 {
     lcd.setCursor(0, row);
-    for(int i = 0; i < COLUMNS; i++) {
+    for (int i = 0; i < COLUMNS; i++)
+    {
         lcd.print(" ");
     }
 }
 
+void show_next_number(unsigned int number, uint8_t index)
+{
+    first_row_mesage("Numero: ");
+    lcd.print(index);
+    second_row_message(number);
+}
+
 void wait_for_button(uint8_t button)
 {
-    while(!digitalRead(button));
+    while (!digitalRead(button));
     delay(250);
 }
