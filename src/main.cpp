@@ -54,9 +54,9 @@ void initiate_game()
 void select_range()
 {
     unsigned int selected_number = 0;
-    first_row_mesage("Cantidad de");
-    second_row_message("numeros");
-    wait_for_button(select_button);
+    first_row_mesage("Elija la cantidad");
+    second_row_message("de numeros ->");
+    wait_for_button(next_button);
     first_row_mesage("Cantidad:");
     second_row_message(selected_number);
     while (!digitalRead(next_button))
@@ -123,18 +123,16 @@ void select_range()
     //     numeros[j] = t;
     // }
 
-    // print the shuffle numbers
-    Serial.println("Numeros generados");
-    for (unsigned int i = 0; i < selected_number; i++)
+    do
     {
-        Serial.println(numeros[i]);
-    }
-
-    for (unsigned int i = 0; i < selected_number; i++)
-    {
-        show_next_number(numeros[i], i + 1);
-        wait_for_button(next_button);
-    }
+        for (unsigned int i = 0; i < selected_number; i++)
+        {
+            show_next_number(numeros[i], i + 1);
+            wait_for_button(next_button);
+        }
+        first_row_mesage("Terminar? - N");
+        second_row_message("Repetir? - S");
+    } while (!digitalRead(next_button));
 }
 
 void first_row_mesage(const char *message)
@@ -190,6 +188,7 @@ void show_next_number(unsigned int number, uint8_t index)
 
 void wait_for_button(uint8_t button)
 {
-    while (!digitalRead(button));
+    while (!digitalRead(button))
+        ;
     delay(250);
 }
