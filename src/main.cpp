@@ -4,12 +4,12 @@
 #define COLUMNS 16
 #define ROWS 2
 
-const uint8_t select_button = D1;
-const uint8_t up_button = D2;
-const uint8_t down_button = D3;
-const uint8_t next_button = D4;
+const uint8_t select_button = D5;
+const uint8_t up_button = D6;
+const uint8_t down_button = D7;
+const uint8_t next_button = D8;
 
-LiquidCrystal_I2C lcd(0x38, COLUMNS, ROWS);
+LiquidCrystal_I2C lcd(0x3F, COLUMNS, ROWS);
 
 void first_row_mesage(const char *message);
 void first_row_mesage(unsigned int number);
@@ -41,6 +41,7 @@ void loop()
 {
     // put your main code here, to run repeatedly:
     initiate_game();
+    
 }
 
 void initiate_game()
@@ -69,10 +70,12 @@ void select_range()
         }
         else if (digitalRead(down_button))
         {
-            selected_number--;
+            if (selected_number != 0)
+                selected_number--;
             second_row_message(selected_number);
             delay(250);
         }
+        yield();
     }
     delay(250);
     Serial.println("Numero seleccionado:");
@@ -122,7 +125,7 @@ void select_range()
     //     numeros[i] = numeros[j];
     //     numeros[j] = t;
     // }
-
+    bool end = false;
     do
     {
         for (unsigned int i = 0; i < selected_number; i++)
@@ -132,7 +135,14 @@ void select_range()
         }
         first_row_mesage("Terminar? - N");
         second_row_message("Repetir? - S");
-    } while (!digitalRead(next_button));
+        do
+        {
+            yield();
+        } while(!digitalRead(select_button) && !digitalRead(next_button));
+        end = digitalRead(select_button);
+        delay(250);
+        yield();
+    } while (end);
 }
 
 void first_row_mesage(const char *message)
@@ -188,7 +198,16 @@ void show_next_number(unsigned int number, uint8_t index)
 
 void wait_for_button(uint8_t button)
 {
-    while (!digitalRead(button))
-        ;
+    while (!digitalRead(button)) { yield(); }
+    Serial.print("boton: ");
+    Serial.println(button);
+    delay(250);
+}
+
+void wait_for_button(uint8_t button_1, uint8_t button_2)
+{
+    while (!digitalRead(button_1) | !digitalRead(button_2)) { yield(); }
+    Serial.print("boton: ");
+    Serial.println(button_1);
     delay(250);
 }
