@@ -4,12 +4,12 @@
 #define COLUMNS 16
 #define ROWS 2
 
-const uint8_t select_button = 5;
-const uint8_t up_button = 7;
-const uint8_t down_button = 6;
-const uint8_t next_button = 8;
+const uint8_t select_button = D1;
+const uint8_t up_button = D2;
+const uint8_t down_button = D3;
+const uint8_t next_button = D4;
 
-LiquidCrystal_I2C lcd(0x27, COLUMNS, ROWS);
+LiquidCrystal_I2C lcd(0x38, COLUMNS, ROWS);
 
 void first_row_mesage(const char *message);
 void first_row_mesage(unsigned int number);
